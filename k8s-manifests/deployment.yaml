@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wisecow-app-deployment
+  labels:
+    app: wisecow-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wisecow-app
+  template:
+    metadata:
+      labels:
+        app: wisecow-app
+    spec:
+      containers:
+      - name: wisecow-app
+        image: uday27/wisecow:latest
+        ports:
+        - containerPort: 4499
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi" 
+            cpu: "1"  
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 4499   
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 4499
+          initialDelaySeconds: 5
+          periodSeconds: 5    
+        
