@@ -1,12 +1,17 @@
-apiVersion: networking.k8s.io/v1  
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: wisecow-app-ingress
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: / 
-spec:   
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  tls:
+  - hosts:
+      - wisecow.example.com
+    secretName: wisecow-tls
   rules:
-  - http:
+  - host: wisecow.example.com
+    http:
       paths:
       - path: /
         pathType: Prefix
@@ -14,16 +19,4 @@ spec:
           service:
             name: wisecow-app-service
             port:
-              number: 4499  
-
-  - host: wisecow.example.com
-    http: 
-      paths:  
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: wisecow-app-service
-            port:
-              number: 4499  
-  
+              number: 4499
