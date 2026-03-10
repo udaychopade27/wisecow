@@ -24,10 +24,10 @@ You should see something like ingress-nginx-controller running.
 
 ## 🧾 Step 2: Create Kubernetes Deployment and Service
 
-Apply your existing manifests:
+Apply your existing manifests (ensure the image in the Deployment matches your Docker Hub username used in CI):
 ```bash
-kubectl apply -f deploy.yml
-kubectl apply -f service.yml
+kubectl apply -f deployment.yaml
+kubectl apply -f service.yaml
 ```
 
 Verify:
@@ -73,7 +73,7 @@ wisecow-tls    kubernetes.io/tls   2      1m
 
 ## 🌐 Step 5: Configure Ingress for HTTPS Access
 
-Use this ingress.yml:
+Use this ingress.yaml:
 ```yaml
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -101,7 +101,7 @@ spec:
 
 Apply it:
 ```bash
-kubectl apply -f ingress.yml
+kubectl apply -f ingress.yaml
 ```
 
 Check status:
@@ -118,7 +118,7 @@ minikube ip
 
 Then edit /etc/hosts on your system and add:
 ```bash
-<MINIKUBE_IP> wisecow.example.com
+<MINIKUBE_IP> wisecow.local
 ```
 
 Example:
@@ -160,7 +160,7 @@ curl https://wisecow.local
 ```
 
 You should now get a valid response without using -k.
-Or open in browser → https://wisecow.example.com
+Or open in browser → https://wisecow.local
 
 ## 🧩 Step 10: Troubleshooting
 | Issue                                | Fix                                                        |
@@ -173,9 +173,9 @@ Or open in browser → https://wisecow.example.com
 
 ## 📦 Cleanup (Optional)
 ```bash
-kubectl delete -f ingress.yml
-kubectl delete -f service.yml
-kubectl delete -f deploy.yml
+kubectl delete -f ingress.yaml
+kubectl delete -f service.yaml
+kubectl delete -f deployment.yaml
 kubectl delete secret wisecow-tls
 ```
 
@@ -184,8 +184,8 @@ kubectl delete secret wisecow-tls
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------- |
 | Generate certificate | `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=wisecow.local/O=wisecow"` |                         |
 | Create TLS secret    | `kubectl create secret tls wisecow-tls --cert=tls.crt --key=tls.key`                                                   |                         |
-| Apply ingress        | `kubectl apply -f ingress.yml`                                                                                         |                         |
-| Map host             | `echo "$(minikube ip) wisecow.local"                                                                                   | sudo tee -a /etc/hosts` |
+| Apply ingress        | `kubectl apply -f ingress.yaml`                                                                                        |                         |
+| Map host             | `sudo sh -c 'echo "$(minikube ip) wisecow.local" >> /etc/hosts'`                                                       |                         |
 | Access app           | `curl -k https://wisecow.local`                                                                                        |                         |
 
 

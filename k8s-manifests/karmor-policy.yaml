@@ -1,0 +1,70 @@
+apiVersion: security.kubearmor.com/v1
+kind: KubeArmorPolicy
+metadata:
+  name: wisecow-zero-trust-policy
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: wisecow-app
+  
+  # Set default posture to block everything not explicitly allowed
+  file:
+    matchDirectories:
+    - dir: /
+      recursive: true
+      action: Block
+    - dir: /usr/share/games/fortunes/
+      recursive: true
+      readOnly: true
+      action: Allow
+    - dir: /usr/share/cowsay/
+      recursive: true
+      readOnly: true
+      action: Allow
+    
+    # Allow only necessary files
+    matchPaths:
+    - path: /usr/games/fortune
+      action: Allow
+    - path: /usr/games/cowsay
+      action: Allow
+    - path: /app/wisecow.sh
+      action: Allow
+    - path: /usr/bin/bash
+      action: Allow
+    - path: /bin/bash
+      action: Allow
+    - path: /usr/bin/nc
+      action: Allow
+    - path: /bin/nc
+      action: Allow
+    
+  process:
+    # Allow only necessary processes
+    matchPaths:
+    - path: /usr/games/fortune
+      action: Allow
+    - path: /usr/games/cowsay
+      action: Allow
+    - path: /bin/bash
+      action: Allow
+    - path: /usr/bin/nc
+      action: Allow
+    - path: /app/wisecow.sh
+      action: Allow
+    
+    # Block everything else
+    matchDirectories:
+    - dir: /
+      recursive: true
+      action: Block
+  
+  network:
+    matchProtocols:
+    - protocol: tcp
+      action: Allow
+    - protocol: udp
+      action: Block
+
+  action: Block  # Default deny posture

@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
       - name: wisecow-app
+        # Update this image to match the Docker Hub username used by CI
         image: uday27/wisecow:latest
         ports:
         - containerPort: 4499
