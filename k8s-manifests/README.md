@@ -9,8 +9,27 @@ Make sure you have the following installed:
 ☸️ Minikube
 ⚙️ kubectl
 🧾 OpenSSL
+🔒 (Optional) KubeArmor (for policy testing)
 
-## 🚀 Step 1: Start Minikube and Enable Ingress
+## 🚀 Quick Deploy (Scripted)
+If you want a one-command local deploy, use:
+```bash
+bash k8s-manifests/deploy-minikube.sh
+```
+Optional env vars:
+```bash
+NAMESPACE=default APP_HOSTNAME=wisecow.local TLS_DIR=/tmp/wisecow-tls bash k8s-manifests/deploy-minikube.sh
+```
+Use an existing Minikube profile (skip start):
+```bash
+MINIKUBE_PROFILE=multi-cluster MINIKUBE_START=false bash k8s-manifests/deploy-minikube.sh
+```
+Start Minikube with custom args:
+```bash
+MINIKUBE_PROFILE=minikube MINIKUBE_ARGS="--driver=docker --memory=2048mb --cpus=2" bash k8s-manifests/deploy-minikube.sh
+```
+
+## 🚀 Step 1: Start Minikube and Enable Ingress (Manual)
 ### Start minikube
 minikube start --driver=docker
 
@@ -169,6 +188,7 @@ Or open in browser → https://wisecow.local
 | Ingress not reachable                | Check `minikube addons list` and ensure Ingress is enabled |
 | Host not found                       | Verify `/etc/hosts` mapping                                |
 | Page not loading                     | Check service and pod status with `kubectl get all`        |
+| Ingress apply times out (webhook)    | Wait for ingress controller rollout, then re-apply ingress |
 
 
 ## 📦 Cleanup (Optional)
@@ -193,3 +213,35 @@ kubectl delete secret wisecow-tls
 ✅ Wisecow app deployed to Kubernetes (Minikube)
 ✅ HTTPS enabled via self-signed certificate
 ✅ Trusted local development environment
+
+---
+
+## 🔒 KubeArmor Policy Test (Zero-Trust)
+Prereq: KubeArmor installed in your cluster and running.
+
+### Apply the policy
+```bash
+kubectl apply -f karmor-policy.yaml
+kubectl get ksp
+```
+
+### Trigger a policy violation
+Find the Wisecow pod:
+```bash
+kubectl get pods -l app=wisecow-app
+```
+Run a blocked command inside the pod (expected to be denied):
+```bash
+kubectl exec -it <POD_NAME> -- /bin/ls /
+```
+
+### Capture logs for screenshot
+Find KubeArmor pod:
+```bash
+kubectl get pods -A | rg -i kubearmor
+```
+Then:
+```bash
+kubectl -n <KUBEARMOR_NAMESPACE> logs <KUBEARMOR_POD> | rg -i "Denied|Block"
+```
+Take a screenshot of the denial log output.
